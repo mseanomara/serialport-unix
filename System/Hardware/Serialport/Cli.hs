@@ -5,7 +5,7 @@ module System.Hardware.Serialport.Cli
     serialPortCliParser
   , serialPortPathParser
   , serialPortSettingsParser
-  , commSpeedParser
+  , baudRateParser
   , bitsPerWordParser
   , stopBitsParser
   , parityParser
@@ -46,18 +46,18 @@ serialPortPathParser = strArgument $ mconcat
 serialPortSettingsParser :: Parser SerialPortSettings
 serialPortSettingsParser =
   SerialPortSettings
-    <$> commSpeedParser
+    <$> baudRateParser
     <*> bitsPerWordParser
     <*> stopBitsParser
     <*> parityParser
     <*> flowControlParser
     <*> timeoutParser
 
-commSpeedParser :: Parser CommSpeed
-commSpeedParser = option auto $ mconcat
+baudRateParser :: Parser BaudRate
+baudRateParser = option auto $ mconcat
   [ long "baudrate"
   , short 'b'
-  , value CS115200
+  , value B115200
   , showDefault
   , metavar "<bps>"
   , help "Baud rate"

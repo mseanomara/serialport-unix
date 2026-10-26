@@ -1,6 +1,6 @@
 import Control.Concurrent.Async
 import Control.Monad
-import System.Hardware.Serialport
+import System.Hardware.Serialport.Posix
 import System.Hardware.Serialport.Cli
 import System.IO
 

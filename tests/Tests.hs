@@ -1,5 +1,5 @@
 import System.Environment
-import System.Hardware.Serialport
+import System.Hardware.Serialport.Posix
 import System.IO
 import qualified Data.ByteString.Char8 as B
 import Test.HUnit
@@ -8,16 +8,16 @@ import Control.Concurrent
 
 
 
-configureComm :: SerialPort -> CommSpeed -> IO ()
+configureComm :: SerialPort -> BaudRate -> IO ()
 configureComm h cs = do
   let control_char = case cs of
-        CS1200   -> "a"
-        CS2400   -> "b"
-        CS4800   -> "c"
-        CS9600   -> "d"
-        CS19200  -> "e"
-        CS57600  -> "f"
-        CS115200 -> "g"
+        B1200   -> "a"
+        B2400   -> "b"
+        B4800   -> "c"
+        B9600   -> "d"
+        B19200  -> "e"
+        B57600  -> "f"
+        B115200 -> "g"
         _        -> error "commSpeed not supported"
   send h $ B.pack control_char
   assertEqual "configure serial port" control_char . B.unpack =<< recv h 100
@@ -35,7 +35,7 @@ sendRange s =
 
 
 
-testSerialport :: CommSpeed -> String -> SerialPort -> Test
+testSerialport :: BaudRate -> String -> SerialPort -> Test
 testSerialport cs test_port control = TestCase $ do
   configureComm control cs
   withSerial test_port defaultSerialSettings { commSpeed = cs } sendRange
@@ -54,7 +54,7 @@ sendRangeH h =
 
 
 
-testHandle :: CommSpeed -> String -> SerialPort -> Test
+testHandle :: BaudRate -> String -> SerialPort -> Test
 testHandle cs test_port control = TestCase $ do
   configureComm control cs
   h <- hOpenSerial test_port defaultSerialSettings { commSpeed = cs }
@@ -88,14 +88,14 @@ tests :: String -> SerialPort -> Test
 tests test_port control = TestList $ map (\(descr,fun) -> TestLabel descr (fun test_port control)) testCases
   where
     testCases = [
-      ("b1200 Serialport",  testSerialport CS1200),
-      ("b2400 Serialport",  testSerialport CS2400),
-      ("b4800 Serialport",  testSerialport CS4800),
-      ("b9600 Serialport",  testSerialport CS9600),
-      ("b19200 Serialport", testSerialport CS19200),
-      ("b57600 Serialport", testSerialport CS57600),
-      ("b115200 Serialport",testSerialport CS115200),
-      ("b9600 Handle",      testHandle CS9600)
+      ("b1200 Serialport",  testSerialport B1200),
+      ("b2400 Serialport",  testSerialport B2400),
+      ("b4800 Serialport",  testSerialport B4800),
+      ("b9600 Serialport",  testSerialport B9600),
+      ("b19200 Serialport", testSerialport B19200),
+      ("b57600 Serialport", testSerialport B57600),
+      ("b115200 Serialport",testSerialport B115200),
+      ("b9600 Handle",      testHandle B9600)
       --("test delay",        testDelay)
       ]
 

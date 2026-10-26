@@ -1,3 +1,7 @@
+0.7.0 (10/26/2026)
+==================
+* Migrated from `serialport` to specialized `serialport-unix` to expose all baud rates
+
 0.6.0 (9/21/2025)
 ==================
 * Remove custom baud rates [22](https://github.com/standardsemiconductor/serialport/pull/22)

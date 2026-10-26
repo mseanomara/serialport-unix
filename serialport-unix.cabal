@@ -1,5 +1,5 @@
-Name:           serialport
-Version:        0.6.0
+Name:           serialport-unix
+Version:        0.7.0
 Cabal-Version:  >= 1.10
 Build-Type:     Simple
 license:        BSD3
@@ -10,8 +10,8 @@ author:         Joris Putcuyps, David Cox
 maintainer:     David Cox <standard.semiconductor@gmail.com>
 homepage:       https://github.com/standardsemiconductor/serialport
 bug-reports:    https://github.com/standardsemiconductor/serialport/issues
-synopsis:       Cross platform serial port library.
-description:    Cross platform haskell library for using the serial port.
+synopsis:       Unix serial port library.
+description:    Unix haskell library for using the serial port, exposing all baud rates.
 category:       Hardware
 Extra-Source-Files: README.md
                     CHANGELOG.md
@@ -22,7 +22,7 @@ source-repository head
   location: https://github.com/standardsemiconductor/serialport
 
 Library
-  Exposed-Modules:    System.Hardware.Serialport
+  Exposed-Modules:    System.Hardware.Serialport.Posix
                       System.Hardware.Serialport.Cli
   Other-Modules:      System.Hardware.Serialport.Types
   Build-Depends:      base                 >= 4.12 && < 4.22,
@@ -30,14 +30,8 @@ Library
                       optparse-applicative >= 0.18 && < 0.20
   ghc-options:        -Wall
   default-language: Haskell2010
-    
-  if !os(windows)
-    Build-Depends:    unix >= 2.8 && < 2.9
-    Other-Modules:    System.Hardware.Serialport.Posix
-  else
-    Build-Depends:    Win32 >= 2.11 && < 2.15
-    Other-Modules:    System.Hardware.Serialport.Windows
-                      System.Win32.Comm
+
+  Build-Depends:    unix >= 2.8 && < 2.9
 
 executable serialport
   ghc-options:        -Wall -O2 -threaded
@@ -47,7 +41,7 @@ executable serialport
   build-depends:      async >= 2.2 && < 2.3,
                       base,
                       optparse-applicative >= 0.18 && < 0.19,
-                      serialport
+                      serialport-unix
 
 Test-Suite Tests
   type:               exitcode-stdio-1.0
@@ -57,4 +51,4 @@ Test-Suite Tests
   build-depends:      base,
                       HUnit,
                       bytestring,
-                      serialport
+                      serialport-unix

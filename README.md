@@ -3,16 +3,15 @@
 [![Haskell CI](https://github.com/standardsemiconductor/serialport/actions/workflows/haskell.yml/badge.svg)](https://github.com/standardsemiconductor/serialport/actions/workflows/haskell.yml)
 [![Hackage][hackage-badge]][hackage]
 
-Cross platform (Linux, Windows and Mac OS) [serial port](https://en.wikipedia.org/wiki/Serial_port) interface.
+Unix-specific [serial port](https://en.wikipedia.org/wiki/Serial_port) interface.
 
 ## Sample Usage
 
 ```haskell
 import System.IO
-import System.Hardware.Serialport
+import System.Hardware.Serialport.Posix
 import qualified Data.ByteString.Char8 as B
 
-let port = "COM3"         -- Windows
 let port = "/dev/ttyUSB0" -- Linux
 withSerial port defaultSerialSettings $ \s -> do
   send s $ B.pack "AT\r"
@@ -23,7 +22,7 @@ withSerial port defaultSerialSettings $ \s -> do
 ```haskell
 import Control.Concurrent.Async
 import Control.Monad
-import System.Hardware.Serialport
+import System.Hardware.Serialport.Posix
 import System.IO
 
 com :: String -> IO ()
@@ -36,7 +35,7 @@ com portPath = hWithSerial portPath serialPortSettings $ \hndl -> do
       writeUart hndl = forever $ hPutChar hndl =<< getChar
 
 serialPortSettings :: SerialPortSettings
-serialPortSettings = defaultSerialSettings{ commSpeed = CS19200 }
+serialPortSettings = defaultSerialSettings{ commSpeed = B19200 }
 ```
 
 ## Tests

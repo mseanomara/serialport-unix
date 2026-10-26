@@ -1,22 +1,21 @@
-{-# OPTIONS_HADDOCK hide #-}
-module System.Hardware.Serialport.Types where
+{-# LANGUAGE DerivingStrategies         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving         #-}
+{-# OPTIONS_GHC -Wno-orphans            #-}
+{-# OPTIONS_HADDOCK hide                #-}
+module System.Hardware.Serialport.Types
+  ( module System.Posix.Terminal
+  , StopBits(..)
+  , Parity(..)
+  , FlowControl(..)
+  , SerialPortSettings(..)
+  , defaultSerialSettings
+  ) where
 
 import Data.Word
+import System.Posix.Terminal
 
--- | Supported baudrates
-data CommSpeed
-  = CS110
-  | CS300
-  | CS600
-  | CS1200
-  | CS2400
-  | CS4800
-  | CS9600
-  | CS19200
-  | CS38400
-  | CS57600
-  | CS115200
-  deriving (Show, Read, Eq, Bounded)
+deriving newtype instance Read BaudRate
 
 data StopBits = One | Two
   deriving (Show, Read, Eq, Bounded)
@@ -28,7 +27,7 @@ data FlowControl = Software | NoFlowControl
   deriving (Show, Read, Eq)
 
 data SerialPortSettings = SerialPortSettings
-  { commSpeed   :: CommSpeed,   -- ^ baudrate
+  { commSpeed   :: BaudRate,    -- ^ baudrate
     bitsPerWord :: Word8,       -- ^ Number of bits in a word
     stopb       :: StopBits,    -- ^ Number of stop bits
     parity      :: Parity,      -- ^ Type of parity
@@ -53,4 +52,4 @@ data SerialPortSettings = SerialPortSettings
 --
 defaultSerialSettings :: SerialPortSettings
 defaultSerialSettings =
-  SerialPortSettings CS9600 8 One NoParity NoFlowControl 1
+  SerialPortSettings B9600 8 One NoParity NoFlowControl 1

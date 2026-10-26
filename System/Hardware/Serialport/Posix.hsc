@@ -1,8 +1,53 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE DeriveDataTypeable       #-}
 {-# LANGUAGE LambdaCase               #-}
-{-# OPTIONS_HADDOCK hide              #-}
-module System.Hardware.Serialport.Posix where
+
+-- |This module provides a Unix-only serial port interface.
+--
+-- > import qualified Data.ByteString.Char8 as B
+-- > import System.Hardware.Serialport.Posix
+-- > let port = "/dev/ttyUSB0"
+-- > withSerial port defaultSerialSettings{ commSpeed = B2400 } $ \s -> do
+-- >   send s $ B.pack "AT\r"
+-- >   recv s 10 >>= print
+--
+-- Alternatively, use handles to perform IO:
+--
+-- > import System.IO
+-- > import System.Hardware.Serialport.Posix
+-- > let port = "/dev/ttyUSB0"
+-- > hWithSerial port defaultSerialSettings $ \h -> do
+-- >   hPutStr h "AT\r"
+-- >   hGetLine h >>= print
+
+module System.Hardware.Serialport.Posix (
+  -- * Types
+   BaudRate(..)
+  ,StopBits(..)
+  ,Parity(..)
+  ,FlowControl(..)
+  ,SerialPort
+  -- * Configure port
+  -- | You don't need the get or set functions, they are used by openSerial
+  ,SerialPortSettings(..)
+  ,defaultSerialSettings
+  ,setSerialSettings
+  ,getSerialSettings
+  -- * Serial methods
+  -- ** Device
+  ,hOpenSerial
+  ,openSerial
+  ,closeSerial
+  ,withSerial
+  ,hWithSerial
+  -- ** Sending & receiving
+  ,send
+  ,recv
+  ,flush
+  -- ** Line control
+  ,setDTR
+  ,setRTS
+  ) where
 
 import qualified Control.Exception as Ex
 import Data.Bits
@@ -17,12 +62,19 @@ import System.Hardware.Serialport.Types
 import System.Posix.IO
 import qualified System.Posix.IO.ByteString as BIO
 import System.Posix.Types (Fd)
-import System.Posix.Terminal
 
 data SerialPort = SerialPort
   { fd           :: Fd
   , portSettings :: SerialPortSettings
   } deriving (Show, Typeable)
+
+-- |Safer device function, so you don't forget to close the device
+withSerial :: FilePath -> SerialPortSettings -> ( SerialPort -> IO a ) -> IO a
+withSerial dev settings = Ex.bracket (openSerial dev settings) closeSerial
+
+-- |Like `withSerial` but using `Handle`
+hWithSerial :: FilePath -> SerialPortSettings -> (Handle -> IO a) -> IO a
+hWithSerial dev settings = Ex.bracket (hOpenSerial dev settings) hClose
 
 -- |Open and configure a serial port returning a standard Handle
 hOpenSerial :: FilePath
@@ -175,8 +227,8 @@ withStopBits termOpts Two =
 
 configureSettings :: TerminalAttributes -> SerialPortSettings -> TerminalAttributes
 configureSettings termOpts settings =
-    termOpts `withInputSpeed` commSpeedToBaudRate (commSpeed settings)
-             `withOutputSpeed` commSpeedToBaudRate (commSpeed settings)
+    termOpts `withInputSpeed` commSpeed settings
+             `withOutputSpeed` commSpeed settings
              `withBits` fromIntegral (bitsPerWord settings)
              `withStopBits` stopb settings
              `withParity` parity settings
@@ -195,18 +247,3 @@ configureSettings termOpts settings =
              `withMode` ReadEnable
              `withTime` timeout settings
              `withMinInput` 0
-
-
-commSpeedToBaudRate :: CommSpeed -> BaudRate
-commSpeedToBaudRate = \case
-  CS110    -> B110
-  CS300    -> B300
-  CS600    -> B600
-  CS1200   -> B1200
-  CS2400   -> B2400
-  CS4800   -> B4800
-  CS9600   -> B9600
-  CS19200  -> B19200
-  CS38400  -> B38400
-  CS57600  -> B57600
-  CS115200 -> B115200
